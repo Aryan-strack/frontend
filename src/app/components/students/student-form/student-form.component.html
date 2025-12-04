@@ -1,0 +1,395 @@
+
+
+<div class="student-form">
+  <!-- Header -->
+  <div class="page-header mb-6">
+    <div class="header-content">
+      <h1>{{ isEditMode ? 'Edit Student' : 'Add New Student' }}</h1>
+      <p class="text-muted">{{ isEditMode ? 'Update student information' : 'Fill in the details to add a new student' }}</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-secondary" (click)="onCancel()">
+        <i class="fas fa-times mr-2"></i> Cancel
+      </button>
+      <button class="btn btn-primary" (click)="onSubmit()" [disabled]="submitting">
+        <i class="fas fa-save mr-2"></i> 
+        {{ submitting ? 'Saving...' : (isEditMode ? 'Update' : 'Save') }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="loading-spinner"></div>
+    <p>Loading student data...</p>
+  </div>
+
+  <!-- Form -->
+  <div *ngIf="!loading" class="form-container">
+    <form [formGroup]="studentForm" (ngSubmit)="onSubmit()">
+      <!-- Personal Information -->
+      <div class="form-section">
+        <div class="section-header">
+          <h3><i class="fas fa-user mr-2"></i> Personal Information</h3>
+        </div>
+        
+        <div class="form-grid">
+          <!-- Name -->
+          <div class="form-group" [class.error]="studentForm.get('name')?.invalid && studentForm.get('name')?.touched">
+            <label for="name">Full Name *</label>
+            <input 
+              type="text" 
+              id="name" 
+              formControlName="name"
+              placeholder="Enter full name"
+              class="form-control">
+            <div class="error-message" *ngIf="studentForm.get('name')?.invalid && studentForm.get('name')?.touched">
+              <span *ngIf="studentForm.get('name')?.errors?.['required']">Name is required</span>
+              <span *ngIf="studentForm.get('name')?.errors?.['minlength']">Minimum 3 characters required</span>
+              <span *ngIf="studentForm.get('name')?.errors?.['maxlength']">Maximum 100 characters allowed</span>
+            </div>
+          </div>
+
+          <!-- Roll Number -->
+          <div class="form-group" [class.error]="studentForm.get('rollNumber')?.invalid && studentForm.get('rollNumber')?.touched">
+            <label for="rollNumber">Roll Number *</label>
+            <input 
+              type="text" 
+              id="rollNumber" 
+              formControlName="rollNumber"
+              placeholder="Enter roll number"
+              class="form-control">
+            <div class="error-message" *ngIf="studentForm.get('rollNumber')?.invalid && studentForm.get('rollNumber')?.touched">
+              <span *ngIf="studentForm.get('rollNumber')?.errors?.['required']">Roll number is required</span>
+              <span *ngIf="studentForm.get('rollNumber')?.errors?.['pattern']">Only uppercase letters and numbers allowed</span>
+            </div>
+          </div>
+
+          <!-- Email -->
+          <div class="form-group" [class.error]="studentForm.get('email')?.invalid && studentForm.get('email')?.touched">
+            <label for="email">Email Address *</label>
+            <input 
+              type="email" 
+              id="email" 
+              formControlName="email"
+              placeholder="Enter email address"
+              class="form-control">
+            <div class="error-message" *ngIf="studentForm.get('email')?.invalid && studentForm.get('email')?.touched">
+              <span *ngIf="studentForm.get('email')?.errors?.['required']">Email is required</span>
+              <span *ngIf="studentForm.get('email')?.errors?.['email']">Invalid email format</span>
+            </div>
+          </div>
+
+          <!-- Phone -->
+          <div class="form-group" [class.error]="studentForm.get('phone')?.invalid && studentForm.get('phone')?.touched">
+            <label for="phone">Phone Number *</label>
+            <input 
+              type="tel" 
+              id="phone" 
+              formControlName="phone"
+              placeholder="Enter phone number"
+              class="form-control">
+            <div class="error-message" *ngIf="studentForm.get('phone')?.invalid && studentForm.get('phone')?.touched">
+              <span *ngIf="studentForm.get('phone')?.errors?.['required']">Phone number is required</span>
+              <span *ngIf="studentForm.get('phone')?.errors?.['pattern']">10-11 digits required</span>
+            </div>
+          </div>
+
+          <!-- Date of Birth -->
+          <div class="form-group" [class.error]="studentForm.get('dateOfBirth')?.invalid && studentForm.get('dateOfBirth')?.touched">
+            <label for="dateOfBirth">Date of Birth *</label>
+            <input 
+              type="date" 
+              id="dateOfBirth" 
+              formControlName="dateOfBirth"
+              class="form-control">
+            <div class="error-message" *ngIf="studentForm.get('dateOfBirth')?.invalid && studentForm.get('dateOfBirth')?.touched">
+              Date of birth is required
+            </div>
+            <div class="form-hint" *ngIf="studentForm.get('dateOfBirth')?.value">
+              Age: {{ calculateAge(studentForm.get('dateOfBirth')?.value) }} years
+            </div>
+          </div>
+
+          <!-- Gender -->
+          <div class="form-group" [class.error]="studentForm.get('gender')?.invalid && studentForm.get('gender')?.touched">
+            <label for="gender">Gender *</label>
+            <select id="gender" formControlName="gender" class="form-control">
+              <option value="">Select Gender</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+            </select>
+            <div class="error-message" *ngIf="studentForm.get('gender')?.invalid && studentForm.get('gender')?.touched">
+              Gender is required
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Academic Information -->
+      <div class="form-section">
+        <div class="section-header">
+          <h3><i class="fas fa-graduation-cap mr-2"></i> Academic Information</h3>
+        </div>
+        
+        <div class="form-grid">
+          <!-- Class -->
+          <div class="form-group" [class.error]="studentForm.get('class')?.invalid && studentForm.get('class')?.touched">
+            <label for="class">Class *</label>
+            <select id="class" formControlName="class" class="form-control">
+              <option value="">Select Class</option>
+              <option *ngFor="let cls of classes" [value]="cls._id">
+                {{ cls.className }} - {{ cls.section }} ({{ cls.academicYear }})
+              </option>
+            </select>
+            <div class="error-message" *ngIf="studentForm.get('class')?.invalid && studentForm.get('class')?.touched">
+              Class is required
+            </div>
+          </div>
+
+          <!-- Department -->
+          <div class="form-group" [class.error]="studentForm.get('department')?.invalid && studentForm.get('department')?.touched">
+            <label for="department">Department *</label>
+            <select id="department" formControlName="department" class="form-control">
+              <option value="">Select Department</option>
+              <option *ngFor="let dept of departments" [value]="dept._id">
+                {{ dept.departmentName }} ({{ dept.departmentCode }})
+              </option>
+            </select>
+            <div class="error-message" *ngIf="studentForm.get('department')?.invalid && studentForm.get('department')?.touched">
+              Department is required
+            </div>
+          </div>
+
+          <!-- Academic Year -->
+          <div class="form-group" [class.error]="studentForm.get('academicYear')?.invalid && studentForm.get('academicYear')?.touched">
+            <label for="academicYear">Academic Year *</label>
+            <input 
+              type="text" 
+              id="academicYear" 
+              formControlName="academicYear"
+              placeholder="e.g., 2024-2025"
+              class="form-control">
+            <div class="error-message" *ngIf="studentForm.get('academicYear')?.invalid && studentForm.get('academicYear')?.touched">
+              <span *ngIf="studentForm.get('academicYear')?.errors?.['required']">Academic year is required</span>
+              <span *ngIf="studentForm.get('academicYear')?.errors?.['pattern']">Format: YYYY-YYYY</span>
+            </div>
+          </div>
+
+          <!-- Status -->
+          <div class="form-group">
+            <label for="status">Status</label>
+            <select id="status" formControlName="status" class="form-control">
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+              <option value="Graduated">Graduated</option>
+              <option value="Suspended">Suspended</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Address Information -->
+      <div class="form-section">
+        <div class="section-header">
+          <h3><i class="fas fa-home mr-2"></i> Address Information</h3>
+        </div>
+        
+        <div class="form-grid" formGroupName="address">
+          <!-- Street -->
+          <div class="form-group" [class.error]="studentForm.get('address.street')?.invalid && studentForm.get('address.street')?.touched">
+            <label for="street">Street Address *</label>
+            <input 
+              type="text" 
+              id="street" 
+              formControlName="street"
+              placeholder="Enter street address"
+              class="form-control">
+            <div class="error-message" *ngIf="studentForm.get('address.street')?.invalid && studentForm.get('address.street')?.touched">
+              Street address is required
+            </div>
+          </div>
+
+          <!-- City -->
+          <div class="form-group" [class.error]="studentForm.get('address.city')?.invalid && studentForm.get('address.city')?.touched">
+            <label for="city">City *</label>
+            <input 
+              type="text" 
+              id="city" 
+              formControlName="city"
+              placeholder="Enter city"
+              class="form-control">
+            <div class="error-message" *ngIf="studentForm.get('address.city')?.invalid && studentForm.get('address.city')?.touched">
+              City is required
+            </div>
+          </div>
+
+          <!-- State -->
+          <div class="form-group" [class.error]="studentForm.get('address.state')?.invalid && studentForm.get('address.state')?.touched">
+            <label for="state">State *</label>
+            <input 
+              type="text" 
+              id="state" 
+              formControlName="state"
+              placeholder="Enter state"
+              class="form-control">
+            <div class="error-message" *ngIf="studentForm.get('address.state')?.invalid && studentForm.get('address.state')?.touched">
+              State is required
+            </div>
+          </div>
+
+          <!-- Zip Code -->
+          <div class="form-group" [class.error]="studentForm.get('address.zipCode')?.invalid && studentForm.get('address.zipCode')?.touched">
+            <label for="zipCode">Zip Code *</label>
+            <input 
+              type="text" 
+              id="zipCode" 
+              formControlName="zipCode"
+              placeholder="Enter zip code"
+              class="form-control">
+            <div class="error-message" *ngIf="studentForm.get('address.zipCode')?.invalid && studentForm.get('address.zipCode')?.touched">
+              Zip code is required
+            </div>
+          </div>
+
+          <!-- Country -->
+          <div class="form-group">
+            <label for="country">Country</label>
+            <input 
+              type="text" 
+              id="country" 
+              formControlName="country"
+              placeholder="Enter country"
+              class="form-control">
+          </div>
+        </div>
+      </div>
+
+      <!-- Guardian Information -->
+      <div class="form-section">
+        <div class="section-header">
+          <h3><i class="fas fa-user-friends mr-2"></i> Guardian Information</h3>
+        </div>
+        
+        <div class="form-grid" formGroupName="guardianInfo">
+          <!-- Guardian Name -->
+          <div class="form-group" [class.error]="studentForm.get('guardianInfo.name')?.invalid && studentForm.get('guardianInfo.name')?.touched">
+            <label for="guardianName">Guardian Name *</label>
+            <input 
+              type="text" 
+              id="guardianName" 
+              formControlName="name"
+              placeholder="Enter guardian name"
+              class="form-control">
+            <div class="error-message" *ngIf="studentForm.get('guardianInfo.name')?.invalid && studentForm.get('guardianInfo.name')?.touched">
+              Guardian name is required
+            </div>
+          </div>
+
+          <!-- Relationship -->
+          <div class="form-group" [class.error]="studentForm.get('guardianInfo.relationship')?.invalid && studentForm.get('guardianInfo.relationship')?.touched">
+            <label for="relationship">Relationship *</label>
+            <select id="relationship" formControlName="relationship" class="form-control">
+              <option value="">Select Relationship</option>
+              <option value="Father">Father</option>
+              <option value="Mother">Mother</option>
+              <option value="Brother">Brother</option>
+              <option value="Sister">Sister</option>
+              <option value="Guardian">Guardian</option>
+              <option value="Other">Other</option>
+            </select>
+            <div class="error-message" *ngIf="studentForm.get('guardianInfo.relationship')?.invalid && studentForm.get('guardianInfo.relationship')?.touched">
+              Relationship is required
+            </div>
+          </div>
+
+          <!-- Guardian Phone -->
+          <div class="form-group" [class.error]="studentForm.get('guardianInfo.phone')?.invalid && studentForm.get('guardianInfo.phone')?.touched">
+            <label for="guardianPhone">Phone Number *</label>
+            <input 
+              type="tel" 
+              id="guardianPhone" 
+              formControlName="phone"
+              placeholder="Enter guardian phone number"
+              class="form-control">
+            <div class="error-message" *ngIf="studentForm.get('guardianInfo.phone')?.invalid && studentForm.get('guardianInfo.phone')?.touched">
+              <span *ngIf="studentForm.get('guardianInfo.phone')?.errors?.['required']">Phone number is required</span>
+              <span *ngIf="studentForm.get('guardianInfo.phone')?.errors?.['pattern']">10-11 digits required</span>
+            </div>
+          </div>
+
+          <!-- Guardian Email -->
+          <div class="form-group" [class.error]="studentForm.get('guardianInfo.email')?.invalid && studentForm.get('guardianInfo.email')?.touched">
+            <label for="guardianEmail">Email Address</label>
+            <input 
+              type="email" 
+              id="guardianEmail" 
+              formControlName="email"
+              placeholder="Enter guardian email"
+              class="form-control">
+            <div class="error-message" *ngIf="studentForm.get('guardianInfo.email')?.invalid && studentForm.get('guardianInfo.email')?.touched">
+              Invalid email format
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Course Selection -->
+      <div class="form-section">
+        <div class="section-header">
+          <h3><i class="fas fa-book mr-2"></i> Course Enrollment</h3>
+          <p class="section-subtitle">Select courses for this student</p>
+        </div>
+        
+        <div class="courses-grid">
+          <div *ngFor="let course of courses" 
+               class="course-card"
+               [class.selected]="isCourseSelected(course)"
+               (click)="toggleCourseSelection(course)">
+            <div class="course-header">
+              <h4>{{ course.courseCode }}</h4>
+              <span class="badge" [class.badge-success]="course.availableSeats > 0"
+                                  [class.badge-warning]="course.availableSeats <= 0">
+                {{ course.availableSeats }} seats left
+              </span>
+            </div>
+            <div class="course-body">
+              <h5>{{ course.courseName }}</h5>
+              <p class="course-meta">
+                <i class="fas fa-clock"></i> {{ course.creditHours }} credits
+                <i class="fas fa-calendar ml-3"></i> {{ course.semester }} {{ course.year }}
+              </p>
+              <p class="course-description">{{ course.description }}</p>
+            </div>
+            <div class="course-footer">
+              <span class="course-instructor">
+                <i class="fas fa-chalkboard-teacher"></i> {{ course.instructor?.name || 'TBA' }}
+              </span>
+              <span class="course-selection">
+                <i class="fas" [class.fa-check-circle]="isCourseSelected(course)" 
+                              [class.fa-plus-circle]="!isCourseSelected(course)"></i>
+              </span>
+            </div>
+          </div>
+        </div>
+        
+        <div *ngIf="courses.length === 0" class="empty-courses">
+          <i class="fas fa-book"></i>
+          <p>No courses available</p>
+        </div>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="onCancel()">
+          Cancel
+        </button>
+        <button type="submit" class="btn btn-primary" [disabled]="studentForm.invalid || submitting">
+          <i class="fas" [class.fa-save]="!submitting" [class.fa-spinner]="submitting"></i>
+          {{ submitting ? 'Saving...' : (isEditMode ? 'Update Student' : 'Create Student') }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

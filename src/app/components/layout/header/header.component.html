@@ -1,0 +1,67 @@
+<header class="header">
+  <div class="container d-flex justify-between align-center">
+    <!-- Logo -->
+    <div class="logo">
+      <a routerLink="/dashboard" class="d-flex align-center gap-2">
+        <i class="fas fa-graduation-cap text-primary" style="font-size: 1.5rem;"></i>
+        <h1 class="header-title">{{ title }}</h1>
+      </a>
+    </div>
+
+    <!-- Desktop Navigation -->
+    <nav class="desktop-nav d-flex gap-4">
+      <a routerLink="/dashboard" routerLinkActive="active" class="nav-link">
+        <i class="fas fa-home"></i> Dashboard
+      </a>
+      <a routerLink="/students" routerLinkActive="active" class="nav-link">
+        <i class="fas fa-users"></i> Students
+      </a>
+      <a routerLink="/classes" routerLinkActive="active" class="nav-link">
+        <i class="fas fa-chalkboard"></i> Classes
+      </a>
+      <a routerLink="/departments" routerLinkActive="active" class="nav-link">
+        <i class="fas fa-building"></i> Departments
+      </a>
+      <a routerLink="/courses" routerLinkActive="active" class="nav-link">
+        <i class="fas fa-book"></i> Courses
+      </a>
+    </nav>
+
+    <!-- User Profile -->
+    <div class="user-profile d-flex align-center gap-3">
+      <div class="user-info text-right">
+        <div class="user-name">Admin User</div>
+        <div class="user-role text-muted">Administrator</div>
+      </div>
+      <div class="avatar">
+        <i class="fas fa-user-circle" style="font-size: 2rem; color: var(--gray-600);"></i>
+      </div>
+    </div>
+
+    <!-- Mobile Menu Toggle -->
+    <button class="mobile-menu-toggle d-none" (click)="toggleMobileMenu()">
+      <i class="fas fa-bars" style="font-size: 1.5rem;"></i>
+    </button>
+  </div>
+
+  <!-- Mobile Navigation -->
+  <div class="mobile-nav" [class.active]="isMobileMenuOpen">
+    <nav class="d-flex flex-column gap-3 p-4">
+      <a routerLink="/dashboard" routerLinkActive="active" class="nav-link" (click)="toggleMobileMenu()">
+        <i class="fas fa-home"></i> Dashboard
+      </a>
+      <a routerLink="/students" routerLinkActive="active" class="nav-link" (click)="toggleMobileMenu()">
+        <i class="fas fa-users"></i> Students
+      </a>
+      <a routerLink="/classes" routerLinkActive="active" class="nav-link" (click)="toggleMobileMenu()">
+        <i class="fas fa-chalkboard"></i> Classes
+      </a>
+      <a routerLink="/departments" routerLinkActive="active" class="nav-link" (click)="toggleMobileMenu()">
+        <i class="fas fa-building"></i> Departments
+      </a>
+      <a routerLink="/courses" routerLinkActive="active" class="nav-link" (click)="toggleMobileMenu()">
+        <i class="fas fa-book"></i> Courses
+      </a>
+    </nav>
+  </div>
+</header>

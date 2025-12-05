@@ -1,0 +1,222 @@
+.department-list {
+  padding: var(--spacing-4) 0;
+}
+
+/* Departments Grid */
+.departments-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: var(--spacing-4);
+}
+
+/* Department Card */
+.department-card {
+  background: var(--bg-primary);
+  border-radius: var(--border-radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+  display: flex;
+  flex-direction: column;
+}
+
+.department-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Department Header */
+.department-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-4);
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: white;
+}
+
+.department-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: var(--border-radius);
+  background-color: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-2xl);
+}
+
+.department-title {
+  flex: 1;
+}
+
+.department-title h3 {
+  margin: 0 0 var(--spacing-1);
+  font-size: var(--font-size-lg);
+  color: white;
+}
+
+.department-code {
+  font-size: var(--font-size-sm);
+  opacity: 0.9;
+}
+
+.department-status {
+  margin-left: auto;
+}
+
+.department-status .badge {
+  background-color: white;
+  color: var(--primary);
+  font-weight: var(--font-weight-bold);
+}
+
+/* Department Body */
+.department-body {
+  padding: var(--spacing-4);
+  flex: 1;
+}
+
+.detail-section {
+  margin-bottom: var(--spacing-4);
+}
+
+.detail-section:last-child {
+  margin-bottom: 0;
+}
+
+.detail-label {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--gray-600);
+  margin-bottom: var(--spacing-1);
+}
+
+.detail-label i {
+  width: 16px;
+  text-align: center;
+}
+
+.detail-value {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--gray-800);
+  margin-bottom: var(--spacing-1);
+}
+
+.detail-subtext {
+  font-size: var(--font-size-xs);
+  color: var(--gray-500);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+/* Statistics Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-3);
+  margin: var(--spacing-3) 0;
+  padding: var(--spacing-3);
+  background-color: var(--gray-50);
+  border-radius: var(--border-radius);
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-value {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--primary);
+  margin-bottom: var(--spacing-1);
+}
+
+.stat-label {
+  font-size: var(--font-size-xs);
+  color: var(--gray-600);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Facilities */
+.facilities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-2);
+  margin-top: var(--spacing-2);
+}
+
+.facility-tag {
+  padding: var(--spacing-1) var(--spacing-2);
+  background-color: var(--gray-100);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-xs);
+  color: var(--gray-700);
+}
+
+.facility-tag.more {
+  background-color: transparent;
+  border: 1px dashed var(--gray-400);
+  color: var(--gray-500);
+}
+
+/* Department Footer */
+.department-footer {
+  padding: var(--spacing-4);
+  border-top: 1px solid var(--border);
+  background-color: var(--gray-50);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-3);
+}
+
+.department-actions {
+  display: flex;
+  gap: var(--spacing-2);
+}
+
+.department-contact {
+  font-size: var(--font-size-xs);
+  color: var(--gray-600);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.department-contact i {
+  margin-right: 2px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .departments-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .department-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .department-actions {
+    justify-content: center;
+  }
+  
+  .department-contact {
+    justify-content: center;
+    text-align: center;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

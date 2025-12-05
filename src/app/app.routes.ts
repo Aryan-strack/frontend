@@ -1,5 +1,4 @@
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { Routes } from '@angular/router';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { StudentListComponent } from './components/students/student-list/student-list.component';
 import { StudentFormComponent } from './components/students/student-form/student-form.component';
@@ -11,7 +10,7 @@ import { DepartmentFormComponent } from './components/departments/department-for
 import { CourseListComponent } from './components/courses/course-list/course-list.component';
 import { CourseFormComponent } from './components/courses/course-form/course-form.component';
 
-const routes: Routes = [
+export const routes: Routes = [
   { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
   { path: 'dashboard', component: DashboardComponent },
   
@@ -38,9 +37,3 @@ const routes: Routes = [
   
   { path: '**', redirectTo: '/dashboard' }
 ];
-
-@NgModule({
-  imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule]
-})
-export class AppRoutingModule { }

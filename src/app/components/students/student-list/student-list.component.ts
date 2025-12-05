@@ -1,4 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { StudentService } from '../../../services/student.service';
 import { ClassService } from '../../../services/class.service';
 import { DepartmentService } from '../../../services/department.service';
@@ -6,10 +9,13 @@ import { Student, SearchFilters } from '../../../models/student.model';
 
 @Component({
   selector: 'app-student-list',
+  standalone: true,
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './student-list.component.html',
   styleUrls: ['./student-list.component.css']
 })
 export class StudentListComponent implements OnInit {
+  Math = Math; // Expose Math object to template
   students: Student[] = [];
   filteredStudents: Student[] = [];
   classes: any[] = [];
@@ -168,5 +174,28 @@ export class StudentListComponent implements OnInit {
         alert('Failed to export students');
       }
     });
+  }
+
+  calculateAge(dateOfBirth: Date | string): number {
+    if (!dateOfBirth) return 0;
+    const dob = new Date(dateOfBirth);
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const monthDiff = today.getMonth() - dob.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+      age--;
+    }
+    return age;
+  }
+
+  getPageNumbers(): number[] {
+    const pages: number[] = [];
+    const maxPagesToShow = 5;
+    const startPage = Math.max(1, this.pagination.currentPage - Math.floor(maxPagesToShow / 2));
+    const endPage = Math.min(this.pagination.totalPages, startPage + maxPagesToShow - 1);
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+    return pages;
   }
 }

@@ -1,0 +1,266 @@
+<div class="course-list">
+  <!-- Header -->
+  <div class="page-header mb-6">
+    <div class="header-content">
+      <h1>Course Management</h1>
+      <p class="text-muted">Manage all courses, view details, and perform actions.</p>
+    </div>
+    <div class="header-actions">
+      <a routerLink="/courses/new" class="btn btn-primary">
+        <i class="fas fa-plus-circle mr-2"></i> Create Course
+      </a>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-card mb-4">
+    <div class="filters-header">
+      <h3>Filters</h3>
+      <button class="btn btn-link" (click)="onClearFilters()">Clear All</button>
+    </div>
+    
+    <div class="filters-grid">
+      <!-- Search Input -->
+      <div class="filter-group">
+        <label for="search">Search by Course Name or Code</label>
+        <div class="search-input">
+          <i class="fas fa-search"></i>
+          <input 
+            type="text" 
+            id="search" 
+            [(ngModel)]="searchTerm"
+            placeholder="Search courses..."
+            (keyup.enter)="onSearch()">
+          <button class="btn btn-sm btn-primary" (click)="onSearch()">Search</button>
+        </div>
+      </div>
+
+      <!-- Department Filter -->
+      <div class="filter-group">
+        <label for="department">Department</label>
+        <select 
+          id="department" 
+          [(ngModel)]="selectedDepartment"
+          (change)="onSearch()"
+          class="form-select">
+          <option value="">All Departments</option>
+          <option *ngFor="let dept of departments" [value]="dept._id">
+            {{ dept.departmentName }} ({{ dept.departmentCode }})
+          </option>
+        </select>
+      </div>
+
+      <!-- Semester Filter -->
+      <div class="filter-group">
+        <label for="semester">Semester</label>
+        <select 
+          id="semester" 
+          [(ngModel)]="selectedSemester"
+          (change)="onSearch()"
+          class="form-select">
+          <option value="">All Semesters</option>
+          <option value="Fall">Fall</option>
+          <option value="Spring">Spring</option>
+          <option value="Summer">Summer</option>
+          <option value="Winter">Winter</option>
+        </select>
+      </div>
+
+      <!-- Year Filter -->
+      <div class="filter-group">
+        <label for="year">Year</label>
+        <select 
+          id="year" 
+          [(ngModel)]="selectedYear"
+          (change)="onSearch()"
+          class="form-select">
+          <option [value]="null">All Years</option>
+          <option [value]="1">1st Year</option>
+          <option [value]="2">2nd Year</option>
+          <option [value]="3">3rd Year</option>
+          <option [value]="4">4th Year</option>
+        </select>
+      </div>
+
+      <!-- Course Type Filter -->
+      <div class="filter-group">
+        <label for="courseType">Course Type</label>
+        <select 
+          id="courseType" 
+          [(ngModel)]="selectedCourseType"
+          (change)="onSearch()"
+          class="form-select">
+          <option value="">All Types</option>
+          <option value="Core">Core</option>
+          <option value="Elective">Elective</option>
+          <option value="Lab">Lab</option>
+          <option value="Project">Project</option>
+          <option value="Thesis">Thesis</option>
+        </select>
+      </div>
+
+      <!-- Status Filter -->
+      <div class="filter-group">
+        <label for="status">Status</label>
+        <select 
+          id="status" 
+          [(ngModel)]="selectedStatus"
+          (change)="onSearch()"
+          class="form-select">
+          <option value="">All Status</option>
+          <option value="Active">Active</option>
+          <option value="Inactive">Inactive</option>
+          <option value="Completed">Completed</option>
+          <option value="Cancelled">Cancelled</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="loading-spinner"></div>
+    <p>Loading courses...</p>
+  </div>
+
+  <!-- Courses Grid -->
+  <div *ngIf="!loading" class="courses-grid">
+    <div *ngIf="filteredCourses.length === 0" class="empty-state">
+      <i class="fas fa-book"></i>
+      <p>No courses found. Try different filters or create new courses.</p>
+    </div>
+    
+    <div *ngFor="let course of filteredCourses" class="course-card">
+      <!-- Course Header -->
+      <div class="course-header">
+        <div class="course-code">{{ course.courseCode }}</div>
+        <div class="course-header-right">
+          <span [class]="'badge ' + getCourseTypeBadgeClass(course.courseType)">
+            {{ course.courseType }}
+          </span>
+          <span [class]="'badge ' + getStatusBadgeClass(course.status)">
+            {{ course.status }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Course Body -->
+      <div class="course-body">
+        <!-- Course Title -->
+        <h3 class="course-title">{{ course.courseName }}</h3>
+        
+        <!-- Course Meta -->
+        <div class="course-meta">
+          <span class="meta-item">
+            <i class="fas fa-clock"></i> {{ course.creditHours }} Credits
+          </span>
+          <span class="meta-item">
+            <i class="fas fa-calendar"></i> {{ course.semester }} {{ course.year }}
+          </span>
+          <span class="meta-item" *ngIf="course.department">
+            <i class="fas fa-building"></i> {{ course.department.departmentName }}
+          </span>
+        </div>
+
+        <!-- Description -->
+        <p class="course-description">{{ course.description || 'No description available' }}</p>
+
+        <!-- Instructor -->
+        <div class="instructor-info" *ngIf="course.instructor?.name">
+          <i class="fas fa-chalkboard-teacher"></i>
+          <span>{{ course.instructor?.name }}</span>
+        </div>
+
+        <!-- Schedule -->
+        <div class="schedule-info" *ngIf="course.schedule">
+          <div class="schedule-days" *ngIf="course.schedule.days && course.schedule.days.length > 0">
+            <i class="fas fa-calendar-day"></i>
+            <span>{{ course.schedule.days.join(', ') }}</span>
+          </div>
+          <div class="schedule-time">
+            <i class="fas fa-clock"></i>
+            <span>{{ course.schedule.time.start }} - {{ course.schedule.time.end }}</span>
+          </div>
+          <div class="schedule-room">
+            <i class="fas fa-door-open"></i>
+            <span>{{ course.schedule.room }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Course Footer -->
+      <div class="course-footer">
+        <!-- Enrollment Stats -->
+        <div class="enrollment-stats">
+          <div class="seats-info">
+            <div class="seats-progress">
+              <div class="progress-bar" 
+                   [style.width.%]="course.enrollmentRate"
+                   [class.bg-danger]="course.enrolledStudents >= course.maxStudents"
+                   [class.bg-warning]="course.enrolledStudents >= course.maxStudents * 0.8 && course.enrolledStudents < course.maxStudents"
+                   [class.bg-success]="course.enrolledStudents < course.maxStudents * 0.8">
+              </div>
+            </div>
+            <div class="seats-count">
+              <span [class]="'badge ' + getSeatsBadgeClass(course)">
+                {{ course.enrolledStudents }}/{{ course.maxStudents }}
+              </span>
+              <span class="text-muted">({{ course.availableSeats }} available)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="course-actions">
+          <a [routerLink]="['/courses', course._id, 'edit']" 
+             class="btn btn-sm btn-warning"
+             title="Edit">
+            <i class="fas fa-edit"></i> Edit
+          </a>
+          <button (click)="onDeleteCourse(course._id!)"
+                  class="btn btn-sm btn-danger"
+                  title="Delete">
+            <i class="fas fa-trash"></i> Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div *ngIf="!loading && pagination.totalPages > 1" class="pagination">
+    <div class="pagination-info">
+      Showing {{ (pagination.currentPage - 1) * pagination.itemsPerPage + 1 }} to 
+      {{ Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems) }} 
+      of {{ pagination.totalItems }} entries
+    </div>
+    
+    <div class="pagination-controls">
+      <button 
+        class="btn btn-sm"
+        [class.disabled]="!pagination.hasPrevPage"
+        (click)="onPageChange(pagination.currentPage - 1)"
+        [disabled]="!pagination.hasPrevPage">
+        <i class="fas fa-chevron-left"></i> Previous
+      </button>
+      
+      <div class="page-numbers">
+        <button 
+          *ngFor="let page of getPageNumbers()"
+          class="btn btn-sm"
+          [class.active]="page === pagination.currentPage"
+          (click)="onPageChange(page)">
+          {{ page }}
+        </button>
+      </div>
+      
+      <button 
+        class="btn btn-sm"
+        [class.disabled]="!pagination.hasNextPage"
+        (click)="onPageChange(pagination.currentPage + 1)"
+        [disabled]="!pagination.hasNextPage">
+        Next <i class="fas fa-chevron-right"></i>
+      </button>
+    </div>
+  </div>
+</div>

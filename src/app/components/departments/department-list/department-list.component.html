@@ -1,0 +1,204 @@
+<div class="department-list">
+  <!-- Header -->
+  <div class="page-header mb-6">
+    <div class="header-content">
+      <h1>Department Management</h1>
+      <p class="text-muted">Manage all departments, view details, and perform actions.</p>
+    </div>
+    <div class="header-actions">
+      <a routerLink="/departments/new" class="btn btn-primary">
+        <i class="fas fa-plus-circle mr-2"></i> Add Department
+      </a>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-card mb-4">
+    <div class="filters-header">
+      <h3>Filters</h3>
+      <button class="btn btn-link" (click)="onClearFilters()">Clear All</button>
+    </div>
+    
+    <div class="filters-grid">
+      <!-- Search Input -->
+      <div class="filter-group">
+        <label for="search">Search by Name or Code</label>
+        <div class="search-input">
+          <i class="fas fa-search"></i>
+          <input 
+            type="text" 
+            id="search" 
+            [(ngModel)]="searchTerm"
+            placeholder="Search departments..."
+            (keyup.enter)="onSearch()">
+          <button class="btn btn-sm btn-primary" (click)="onSearch()">Search</button>
+        </div>
+      </div>
+
+      <!-- Status Filter -->
+      <div class="filter-group">
+        <label for="status">Status</label>
+        <select 
+          id="status" 
+          [(ngModel)]="selectedStatus"
+          (change)="onSearch()"
+          class="form-select">
+          <option value="">All Status</option>
+          <option value="Active">Active</option>
+          <option value="Inactive">Inactive</option>
+          <option value="Under Maintenance">Under Maintenance</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="loading-spinner"></div>
+    <p>Loading departments...</p>
+  </div>
+
+  <!-- Departments Grid -->
+  <div *ngIf="!loading" class="departments-grid">
+    <div *ngIf="filteredDepartments.length === 0" class="empty-state">
+      <i class="fas fa-building"></i>
+      <p>No departments found. Try different filters or add new departments.</p>
+    </div>
+    
+    <div *ngFor="let dept of filteredDepartments" class="department-card">
+      <!-- Department Header -->
+      <div class="department-header">
+        <div class="department-icon">
+          <i class="fas fa-university"></i>
+        </div>
+        <div class="department-title">
+          <h3>{{ dept.departmentName }}</h3>
+          <span class="department-code">{{ dept.departmentCode }}</span>
+        </div>
+        <div class="department-status">
+          <span [class]="'badge ' + getStatusBadgeClass(dept.status)">
+            {{ dept.status }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Department Details -->
+      <div class="department-body">
+        <!-- HOD Information -->
+        <div class="detail-section">
+          <div class="detail-label">
+            <i class="fas fa-user-tie"></i> Head of Department
+          </div>
+          <div class="detail-value">{{ dept.headOfDepartment.name }}</div>
+          <div class="detail-subtext">
+            <i class="fas fa-phone"></i> {{ dept.headOfDepartment.phone }} | 
+            <i class="fas fa-envelope"></i> {{ dept.headOfDepartment.email }}
+          </div>
+        </div>
+
+        <!-- Statistics -->
+        <div class="stats-grid">
+          <div class="stat-item">
+            <div class="stat-value">{{ dept.totalFaculty }}</div>
+            <div class="stat-label">Faculty</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">{{ dept.totalStudents }}</div>
+            <div class="stat-label">Students</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">{{ calculateUtilization(dept) }}</div>
+            <div class="stat-label">S/F Ratio</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">{{ dept.age }} yrs</div>
+            <div class="stat-label">Established</div>
+          </div>
+        </div>
+
+        <!-- Facilities -->
+        <div class="detail-section" *ngIf="dept.facilities && dept.facilities.length > 0">
+          <div class="detail-label">
+            <i class="fas fa-wrench"></i> Facilities
+          </div>
+          <div class="facilities">
+            <span *ngFor="let facility of dept.facilities.slice(0, 3)" 
+                  class="facility-tag">
+              {{ facility }}
+            </span>
+            <span *ngIf="dept.facilities.length > 3" class="facility-tag more">
+              +{{ dept.facilities.length - 3 }} more
+            </span>
+          </div>
+        </div>
+
+        <!-- Location -->
+        <div class="detail-section" *ngIf="dept.location">
+          <div class="detail-label">
+            <i class="fas fa-map-marker-alt"></i> Location
+          </div>
+          <div class="detail-value">
+            {{ dept.location.building }}, {{ dept.location.floor }}, {{ dept.location.room }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Department Footer -->
+      <div class="department-footer">
+        <div class="department-actions">
+          <a [routerLink]="['/departments', dept._id, 'edit']" 
+             class="btn btn-sm btn-warning"
+             title="Edit">
+            <i class="fas fa-edit"></i> Edit
+          </a>
+          <button (click)="onDeleteDepartment(dept._id!)"
+                  class="btn btn-sm btn-danger"
+                  title="Delete">
+            <i class="fas fa-trash"></i> Delete
+          </button>
+        </div>
+        <div class="department-contact">
+          <i class="fas fa-phone"></i> {{ dept.contactPhone }} | 
+          <i class="fas fa-envelope"></i> {{ dept.contactEmail }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div *ngIf="!loading && pagination.totalPages > 1" class="pagination">
+    <div class="pagination-info">
+      Showing {{ (pagination.currentPage - 1) * pagination.itemsPerPage + 1 }} to 
+      {{ Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems) }} 
+      of {{ pagination.totalItems }} entries
+    </div>
+    
+    <div class="pagination-controls">
+      <button 
+        class="btn btn-sm"
+        [class.disabled]="!pagination.hasPrevPage"
+        (click)="onPageChange(pagination.currentPage - 1)"
+        [disabled]="!pagination.hasPrevPage">
+        <i class="fas fa-chevron-left"></i> Previous
+      </button>
+      
+      <div class="page-numbers">
+        <button 
+          *ngFor="let page of getPageNumbers()"
+          class="btn btn-sm"
+          [class.active]="page === pagination.currentPage"
+          (click)="onPageChange(page)">
+          {{ page }}
+        </button>
+      </div>
+      
+      <button 
+        class="btn btn-sm"
+        [class.disabled]="!pagination.hasNextPage"
+        (click)="onPageChange(pagination.currentPage + 1)"
+        [disabled]="!pagination.hasNextPage">
+        Next <i class="fas fa-chevron-right"></i>
+      </button>
+    </div>
+  </div>
+</div>

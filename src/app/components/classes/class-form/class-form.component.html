@@ -1,0 +1,262 @@
+<div class="class-form">
+  <!-- Header -->
+  <div class="page-header mb-6">
+    <div class="header-content">
+      <h1>{{ isEditMode ? 'Edit Class' : 'Create New Class' }}</h1>
+      <p class="text-muted">{{ isEditMode ? 'Update class information' : 'Fill in the details to create a new class' }}</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-secondary" (click)="onCancel()">
+        <i class="fas fa-times mr-2"></i> Cancel
+      </button>
+      <button class="btn btn-primary" (click)="onSubmit()" [disabled]="submitting">
+        <i class="fas fa-save mr-2"></i> 
+        {{ submitting ? 'Saving...' : (isEditMode ? 'Update' : 'Create') }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="loading-spinner"></div>
+    <p>Loading class data...</p>
+  </div>
+
+  <!-- Form -->
+  <div *ngIf="!loading" class="form-container">
+    <form [formGroup]="classForm" (ngSubmit)="onSubmit()">
+      <!-- Basic Information -->
+      <div class="form-section">
+        <div class="section-header">
+          <h3><i class="fas fa-info-circle mr-2"></i> Basic Information</h3>
+        </div>
+        
+        <div class="form-grid">
+          <!-- Class Name -->
+          <div class="form-group" [class.error]="classForm.get('className')?.invalid && classForm.get('className')?.touched">
+            <label for="className">Class Name *</label>
+            <input 
+              type="text" 
+              id="className" 
+              formControlName="className"
+              placeholder="e.g., CS101"
+              class="form-control">
+            <div class="error-message" *ngIf="classForm.get('className')?.invalid && classForm.get('className')?.touched">
+              <span *ngIf="classForm.get('className')?.errors?.['required']">Class name is required</span>
+              <span *ngIf="classForm.get('className')?.errors?.['pattern']">Only uppercase letters and numbers allowed</span>
+            </div>
+          </div>
+
+          <!-- Section -->
+          <div class="form-group" [class.error]="classForm.get('section')?.invalid && classForm.get('section')?.touched">
+            <label for="section">Section *</label>
+            <input 
+              type="text" 
+              id="section" 
+              formControlName="section"
+              placeholder="e.g., A"
+              class="form-control">
+            <div class="error-message" *ngIf="classForm.get('section')?.invalid && classForm.get('section')?.touched">
+              <span *ngIf="classForm.get('section')?.errors?.['required']">Section is required</span>
+              <span *ngIf="classForm.get('section')?.errors?.['pattern']">Single uppercase letter required</span>
+            </div>
+          </div>
+
+          <!-- Academic Year -->
+          <div class="form-group" [class.error]="classForm.get('academicYear')?.invalid && classForm.get('academicYear')?.touched">
+            <label for="academicYear">Academic Year *</label>
+            <input 
+              type="text" 
+              id="academicYear" 
+              formControlName="academicYear"
+              placeholder="e.g., 2024-2025"
+              class="form-control">
+            <div class="error-message" *ngIf="classForm.get('academicYear')?.invalid && classForm.get('academicYear')?.touched">
+              <span *ngIf="classForm.get('academicYear')?.errors?.['required']">Academic year is required</span>
+              <span *ngIf="classForm.get('academicYear')?.errors?.['pattern']">Format: YYYY-YYYY</span>
+            </div>
+          </div>
+
+          <!-- Department -->
+          <div class="form-group" [class.error]="classForm.get('department')?.invalid && classForm.get('department')?.touched">
+            <label for="department">Department *</label>
+            <select id="department" formControlName="department" class="form-control">
+              <option value="">Select Department</option>
+              <option *ngFor="let dept of departments" [value]="dept._id">
+                {{ dept.departmentName }} ({{ dept.departmentCode }})
+              </option>
+            </select>
+            <div class="error-message" *ngIf="classForm.get('department')?.invalid && classForm.get('department')?.touched">
+              Department is required
+            </div>
+          </div>
+
+          <!-- Capacity -->
+          <div class="form-group" [class.error]="classForm.get('capacity')?.invalid && classForm.get('capacity')?.touched">
+            <label for="capacity">Capacity *</label>
+            <input 
+              type="number" 
+              id="capacity" 
+              formControlName="capacity"
+              placeholder="Maximum students"
+              class="form-control">
+            <div class="error-message" *ngIf="classForm.get('capacity')?.invalid && classForm.get('capacity')?.touched">
+              <span *ngIf="classForm.get('capacity')?.errors?.['required']">Capacity is required</span>
+              <span *ngIf="classForm.get('capacity')?.errors?.['min']">Minimum 1 student required</span>
+              <span *ngIf="classForm.get('capacity')?.errors?.['max']">Maximum 100 students allowed</span>
+            </div>
+          </div>
+
+          <!-- Status -->
+          <div class="form-group">
+            <label for="status">Status</label>
+            <select id="status" formControlName="status" class="form-control">
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+              <option value="Completed">Completed</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Class Teacher -->
+      <div class="form-section">
+        <div class="section-header">
+          <h3><i class="fas fa-chalkboard-teacher mr-2"></i> Class Teacher</h3>
+        </div>
+        
+        <div class="form-grid" formGroupName="classTeacher">
+          <!-- Teacher Name -->
+          <div class="form-group">
+            <label for="teacherName">Teacher Name</label>
+            <input 
+              type="text" 
+              id="teacherName" 
+              formControlName="name"
+              placeholder="Enter teacher name"
+              class="form-control">
+          </div>
+
+          <!-- Teacher Email -->
+          <div class="form-group" [class.error]="classForm.get('classTeacher.email')?.invalid && classForm.get('classTeacher.email')?.touched">
+            <label for="teacherEmail">Email</label>
+            <input 
+              type="email" 
+              id="teacherEmail" 
+              formControlName="email"
+              placeholder="Enter teacher email"
+              class="form-control">
+            <div class="error-message" *ngIf="classForm.get('classTeacher.email')?.invalid && classForm.get('classTeacher.email')?.touched">
+              Invalid email format
+            </div>
+          </div>
+
+          <!-- Teacher Phone -->
+          <div class="form-group" [class.error]="classForm.get('classTeacher.phone')?.invalid && classForm.get('classTeacher.phone')?.touched">
+            <label for="teacherPhone">Phone</label>
+            <input 
+              type="tel" 
+              id="teacherPhone" 
+              formControlName="phone"
+              placeholder="Enter teacher phone"
+              class="form-control">
+            <div class="error-message" *ngIf="classForm.get('classTeacher.phone')?.invalid && classForm.get('classTeacher.phone')?.touched">
+              10-11 digits required
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Schedule -->
+      <div class="form-section">
+        <div class="section-header">
+          <h3><i class="fas fa-calendar-alt mr-2"></i> Schedule</h3>
+        </div>
+        
+        <div class="form-grid" formGroupName="schedule">
+          <!-- Days of Week -->
+          <div class="form-group">
+            <label>Class Days</label>
+            <div class="days-selector">
+              <button 
+                *ngFor="let day of daysOfWeek"
+                type="button"
+                class="day-btn"
+                [class.selected]="isDaySelected(day)"
+                (click)="toggleDaySelection(day)">
+                {{ day.slice(0, 3) }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Time -->
+          <div class="form-group">
+            <label for="startTime">Start Time</label>
+            <input 
+              type="time" 
+              id="startTime" 
+              formControlName="startTime"
+              class="form-control"
+              formControlName="start"
+              [ngModel]="classForm.get('schedule.time.start')?.value"
+              (ngModelChange)="classForm.get('schedule.time.start')?.setValue($event)">
+          </div>
+
+          <div class="form-group">
+            <label for="endTime">End Time</label>
+            <input 
+              type="time" 
+              id="endTime" 
+              class="form-control"
+              formControlName="end"
+              [ngModel]="classForm.get('schedule.time.end')?.value"
+              (ngModelChange)="classForm.get('schedule.time.end')?.setValue($event)">
+          </div>
+
+          <!-- Room Number -->
+          <div class="form-group">
+            <label for="roomNumber">Room Number</label>
+            <input 
+              type="text" 
+              id="roomNumber" 
+              formControlName="roomNumber"
+              placeholder="e.g., Room 101"
+              class="form-control">
+          </div>
+        </div>
+      </div>
+
+      <!-- Description -->
+      <div class="form-section">
+        <div class="section-header">
+          <h3><i class="fas fa-align-left mr-2"></i> Description</h3>
+        </div>
+        
+        <div class="form-group">
+          <label for="description">Class Description</label>
+          <textarea 
+            id="description" 
+            formControlName="description"
+            placeholder="Enter class description..."
+            rows="4"
+            class="form-control"
+            maxlength="500"></textarea>
+          <div class="form-hint">
+            {{ classForm.get('description')?.value?.length || 0 }}/500 characters
+          </div>
+        </div>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="onCancel()">
+          Cancel
+        </button>
+        <button type="submit" class="btn btn-primary" [disabled]="classForm.invalid || submitting">
+          <i class="fas" [class.fa-save]="!submitting" [class.fa-spinner]="submitting"></i>
+          {{ submitting ? 'Saving...' : (isEditMode ? 'Update Class' : 'Create Class') }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

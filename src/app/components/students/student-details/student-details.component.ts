@@ -1,10 +1,14 @@
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { ActivatedRoute, Router } from '@angular/router';
 import { StudentService } from '../../../services/student.service';
 import { Student } from '../../../models/student.model';
 
 @Component({
   selector: 'app-student-details',
+  standalone: true,
+  imports: [CommonModule, RouterLink],
   templateUrl: './student-details.component.html',
   styleUrls: ['./student-details.component.css']
 })

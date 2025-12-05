@@ -1,0 +1,324 @@
+<div class="department-form">
+  <!-- Header -->
+  <div class="page-header mb-6">
+    <div class="header-content">
+      <h1>{{ isEditMode ? 'Edit Department' : 'Create New Department' }}</h1>
+      <p class="text-muted">{{ isEditMode ? 'Update department information' : 'Fill in the details to create a new department' }}</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-secondary" (click)="onCancel()">
+        <i class="fas fa-times mr-2"></i> Cancel
+      </button>
+      <button class="btn btn-primary" (click)="onSubmit()" [disabled]="submitting">
+        <i class="fas fa-save mr-2"></i> 
+        {{ submitting ? 'Saving...' : (isEditMode ? 'Update' : 'Create') }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="loading-spinner"></div>
+    <p>Loading department data...</p>
+  </div>
+
+  <!-- Form -->
+  <div *ngIf="!loading" class="form-container">
+    <form [formGroup]="departmentForm" (ngSubmit)="onSubmit()">
+      <!-- Basic Information -->
+      <div class="form-section">
+        <div class="section-header">
+          <h3><i class="fas fa-info-circle mr-2"></i> Basic Information</h3>
+        </div>
+        
+        <div class="form-grid">
+          <!-- Department Name -->
+          <div class="form-group" [class.error]="departmentForm.get('departmentName')?.invalid && departmentForm.get('departmentName')?.touched">
+            <label for="departmentName">Department Name *</label>
+            <input 
+              type="text" 
+              id="departmentName" 
+              formControlName="departmentName"
+              placeholder="e.g., Computer Science"
+              class="form-control">
+            <div class="error-message" *ngIf="departmentForm.get('departmentName')?.invalid && departmentForm.get('departmentName')?.touched">
+              <span *ngIf="departmentForm.get('departmentName')?.errors?.['required']">Department name is required</span>
+              <span *ngIf="departmentForm.get('departmentName')?.errors?.['minlength']">Minimum 2 characters required</span>
+            </div>
+          </div>
+
+          <!-- Department Code -->
+          <div class="form-group" [class.error]="departmentForm.get('departmentCode')?.invalid && departmentForm.get('departmentCode')?.touched">
+            <label for="departmentCode">Department Code *</label>
+            <input 
+              type="text" 
+              id="departmentCode" 
+              formControlName="departmentCode"
+              placeholder="e.g., CS"
+              class="form-control">
+            <div class="error-message" *ngIf="departmentForm.get('departmentCode')?.invalid && departmentForm.get('departmentCode')?.touched">
+              <span *ngIf="departmentForm.get('departmentCode')?.errors?.['required']">Department code is required</span>
+              <span *ngIf="departmentForm.get('departmentCode')?.errors?.['pattern']">2-6 uppercase letters required</span>
+            </div>
+          </div>
+
+          <!-- Establishment Year -->
+          <div class="form-group" [class.error]="departmentForm.get('establishmentYear')?.invalid && departmentForm.get('establishmentYear')?.touched">
+            <label for="establishmentYear">Establishment Year *</label>
+            <input 
+              type="number" 
+              id="establishmentYear" 
+              formControlName="establishmentYear"
+              placeholder="e.g., 2000"
+              class="form-control">
+            <div class="error-message" *ngIf="departmentForm.get('establishmentYear')?.invalid && departmentForm.get('establishmentYear')?.touched">
+              <span *ngIf="departmentForm.get('establishmentYear')?.errors?.['required']">Establishment year is required</span>
+              <span *ngIf="departmentForm.get('establishmentYear')?.errors?.['min']">Year must be after 1900</span>
+              <span *ngIf="departmentForm.get('establishmentYear')?.errors?.['max']">Year cannot be in the future</span>
+            </div>
+            <div class="form-hint" *ngIf="departmentForm.get('establishmentYear')?.value">
+              {{ calculateAge() }} years old
+            </div>
+          </div>
+
+          <!-- Status -->
+          <div class="form-group">
+            <label for="status">Status</label>
+            <select id="status" formControlName="status" class="form-control">
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+              <option value="Under Maintenance">Under Maintenance</option>
+            </select>
+          </div>
+
+          <!-- Contact Email -->
+          <div class="form-group" [class.error]="departmentForm.get('contactEmail')?.invalid && departmentForm.get('contactEmail')?.touched">
+            <label for="contactEmail">Contact Email *</label>
+            <input 
+              type="email" 
+              id="contactEmail" 
+              formControlName="contactEmail"
+              placeholder="e.g., cs@university.edu"
+              class="form-control">
+            <div class="error-message" *ngIf="departmentForm.get('contactEmail')?.invalid && departmentForm.get('contactEmail')?.touched">
+              <span *ngIf="departmentForm.get('contactEmail')?.errors?.['required']">Contact email is required</span>
+              <span *ngIf="departmentForm.get('contactEmail')?.errors?.['email']">Invalid email format</span>
+            </div>
+          </div>
+
+          <!-- Contact Phone -->
+          <div class="form-group" [class.error]="departmentForm.get('contactPhone')?.invalid && departmentForm.get('contactPhone')?.touched">
+            <label for="contactPhone">Contact Phone *</label>
+            <input 
+              type="tel" 
+              id="contactPhone" 
+              formControlName="contactPhone"
+              placeholder="e.g., 1234567890"
+              class="form-control">
+            <div class="error-message" *ngIf="departmentForm.get('contactPhone')?.invalid && departmentForm.get('contactPhone')?.touched">
+              <span *ngIf="departmentForm.get('contactPhone')?.errors?.['required']">Contact phone is required</span>
+              <span *ngIf="departmentForm.get('contactPhone')?.errors?.['pattern']">10-11 digits required</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Head of Department -->
+      <div class="form-section">
+        <div class="section-header">
+          <h3><i class="fas fa-user-tie mr-2"></i> Head of Department</h3>
+        </div>
+        
+        <div class="form-grid" formGroupName="headOfDepartment">
+          <!-- HOD Name -->
+          <div class="form-group" [class.error]="departmentForm.get('headOfDepartment.name')?.invalid && departmentForm.get('headOfDepartment.name')?.touched">
+            <label for="hodName">Name *</label>
+            <input 
+              type="text" 
+              id="hodName" 
+              formControlName="name"
+              placeholder="Enter HOD name"
+              class="form-control">
+            <div class="error-message" *ngIf="departmentForm.get('headOfDepartment.name')?.invalid && departmentForm.get('headOfDepartment.name')?.touched">
+              HOD name is required
+            </div>
+          </div>
+
+          <!-- HOD Email -->
+          <div class="form-group" [class.error]="departmentForm.get('headOfDepartment.email')?.invalid && departmentForm.get('headOfDepartment.email')?.touched">
+            <label for="hodEmail">Email *</label>
+            <input 
+              type="email" 
+              id="hodEmail" 
+              formControlName="email"
+              placeholder="Enter HOD email"
+              class="form-control">
+            <div class="error-message" *ngIf="departmentForm.get('headOfDepartment.email')?.invalid && departmentForm.get('headOfDepartment.email')?.touched">
+              <span *ngIf="departmentForm.get('headOfDepartment.email')?.errors?.['required']">HOD email is required</span>
+              <span *ngIf="departmentForm.get('headOfDepartment.email')?.errors?.['email']">Invalid email format</span>
+            </div>
+          </div>
+
+          <!-- HOD Phone -->
+          <div class="form-group" [class.error]="departmentForm.get('headOfDepartment.phone')?.invalid && departmentForm.get('headOfDepartment.phone')?.touched">
+            <label for="hodPhone">Phone *</label>
+            <input 
+              type="tel" 
+              id="hodPhone" 
+              formControlName="phone"
+              placeholder="Enter HOD phone"
+              class="form-control">
+            <div class="error-message" *ngIf="departmentForm.get('headOfDepartment.phone')?.invalid && departmentForm.get('headOfDepartment.phone')?.touched">
+              <span *ngIf="departmentForm.get('headOfDepartment.phone')?.errors?.['required']">HOD phone is required</span>
+              <span *ngIf="departmentForm.get('headOfDepartment.phone')?.errors?.['pattern']">10-11 digits required</span>
+            </div>
+          </div>
+
+          <!-- HOD Qualification -->
+          <div class="form-group">
+            <label for="hodQualification">Qualification</label>
+            <input 
+              type="text" 
+              id="hodQualification" 
+              formControlName="qualification"
+              placeholder="e.g., PhD in Computer Science"
+              class="form-control">
+          </div>
+        </div>
+      </div>
+
+      <!-- Location -->
+      <div class="form-section">
+        <div class="section-header">
+          <h3><i class="fas fa-map-marker-alt mr-2"></i> Location</h3>
+        </div>
+        
+        <div class="form-grid" formGroupName="location">
+          <!-- Building -->
+          <div class="form-group">
+            <label for="building">Building</label>
+            <input 
+              type="text" 
+              id="building" 
+              formControlName="building"
+              placeholder="e.g., Science Block"
+              class="form-control">
+          </div>
+
+          <!-- Floor -->
+          <div class="form-group">
+            <label for="floor">Floor</label>
+            <input 
+              type="text" 
+              id="floor" 
+              formControlName="floor"
+              placeholder="e.g., 3rd Floor"
+              class="form-control">
+          </div>
+
+          <!-- Room -->
+          <div class="form-group">
+            <label for="room">Room</label>
+            <input 
+              type="text" 
+              id="room" 
+              formControlName="room"
+              placeholder="e.g., Room 301"
+              class="form-control">
+          </div>
+        </div>
+      </div>
+
+      <!-- Statistics -->
+      <div class="form-section">
+        <div class="section-header">
+          <h3><i class="fas fa-chart-bar mr-2"></i> Statistics</h3>
+        </div>
+        
+        <div class="form-grid">
+          <!-- Total Faculty -->
+          <div class="form-group">
+            <label for="totalFaculty">Total Faculty</label>
+            <input 
+              type="number" 
+              id="totalFaculty" 
+              formControlName="totalFaculty"
+              placeholder="Number of faculty members"
+              class="form-control">
+          </div>
+
+          <!-- Total Students -->
+          <div class="form-group">
+            <label for="totalStudents">Total Students</label>
+            <input 
+              type="number" 
+              id="totalStudents" 
+              formControlName="totalStudents"
+              placeholder="Number of students"
+              class="form-control">
+          </div>
+        </div>
+      </div>
+
+      <!-- Facilities -->
+      <div class="form-section">
+        <div class="section-header">
+          <h3><i class="fas fa-wrench mr-2"></i> Facilities</h3>
+          <p class="section-subtitle">Add facilities available in this department</p>
+        </div>
+        
+        <div formArrayName="facilities">
+          <div *ngFor="let facility of facilities.controls; let i = index" 
+               class="facility-item mb-3">
+            <div class="d-flex gap-2">
+              <input 
+                type="text" 
+                [formControlName]="i"
+                placeholder="e.g., Computer Lab"
+                class="form-control">
+              <button type="button" class="btn btn-danger" (click)="removeFacility(i)">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <button type="button" class="btn btn-secondary btn-sm" (click)="addFacility()">
+          <i class="fas fa-plus mr-2"></i> Add Facility
+        </button>
+      </div>
+
+      <!-- Description -->
+      <div class="form-section">
+        <div class="section-header">
+          <h3><i class="fas fa-align-left mr-2"></i> Description</h3>
+        </div>
+        
+        <div class="form-group">
+          <label for="description">Department Description</label>
+          <textarea 
+            id="description" 
+            formControlName="description"
+            placeholder="Enter department description..."
+            rows="5"
+            class="form-control"
+            maxlength="1000"></textarea>
+          <div class="form-hint">
+            {{ departmentForm.get('description')?.value?.length || 0 }}/1000 characters
+          </div>
+        </div>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="onCancel()">
+          Cancel
+        </button>
+        <button type="submit" class="btn btn-primary" [disabled]="departmentForm.invalid || submitting">
+          <i class="fas" [class.fa-save]="!submitting" [class.fa-spinner]="submitting"></i>
+          {{ submitting ? 'Saving...' : (isEditMode ? 'Update Department' : 'Create Department') }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { firstValueFrom } from 'rxjs';
 import { StudentService } from '../../services/student.service';
 import { ClassService } from '../../services/class.service';
 import { DepartmentService } from '../../services/department.service';
@@ -6,6 +8,8 @@ import { CourseService } from '../../services/course.service';
 
 @Component({
   selector: 'app-dashboard',
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
@@ -40,16 +44,16 @@ export class DashboardComponent implements OnInit {
     
     // Load all statistics in parallel
     Promise.all([
-      this.studentService.getStudentStats().toPromise(),
-      this.classService.getClassStats().toPromise(),
-      this.departmentService.getDepartmentStats().toPromise(),
-      this.courseService.getCourseStats().toPromise(),
-      this.studentService.getStudents(1, 5).toPromise(),
-      this.classService.getClasses(1, 5).toPromise()
+      firstValueFrom(this.studentService.getStudentStats()),
+      firstValueFrom(this.classService.getClassStats()),
+      firstValueFrom(this.departmentService.getDepartmentStats()),
+      firstValueFrom(this.courseService.getCourseStats()),
+      firstValueFrom(this.studentService.getStudents(1, 5)),
+      firstValueFrom(this.classService.getClasses(1, 5))
     ]).then(([studentStats, classStats, deptStats, courseStats, students, classes]) => {
       // Update stats
       this.stats.totalStudents = studentStats?.overview?.totalStudents || 0;
-      this.stats.activeStudents = studentStats?.overview?.statusDistribution?.active || 0;
+      this.stats.activeStudents = studentStats?.overview?.activeStudents || 0;
       
       this.stats.totalClasses = classStats?.overview?.totalClasses || 0;
       this.stats.activeClasses = classStats?.overview?.activeClasses || 0;

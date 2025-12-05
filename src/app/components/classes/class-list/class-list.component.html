@@ -1,0 +1,221 @@
+<div class="class-list">
+  <!-- Header -->
+  <div class="page-header mb-6">
+    <div class="header-content">
+      <h1>Class Management</h1>
+      <p class="text-muted">Manage all classes, view details, and perform actions.</p>
+    </div>
+    <div class="header-actions">
+      <a routerLink="/classes/new" class="btn btn-primary">
+        <i class="fas fa-plus-circle mr-2"></i> Create Class
+      </a>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-card mb-4">
+    <div class="filters-header">
+      <h3>Filters</h3>
+      <button class="btn btn-link" (click)="onClearFilters()">Clear All</button>
+    </div>
+    
+    <div class="filters-grid">
+      <!-- Search Input -->
+      <div class="filter-group">
+        <label for="search">Search by Class Name</label>
+        <div class="search-input">
+          <i class="fas fa-search"></i>
+          <input 
+            type="text" 
+            id="search" 
+            [(ngModel)]="searchTerm"
+            placeholder="Search classes..."
+            (keyup.enter)="onSearch()">
+          <button class="btn btn-sm btn-primary" (click)="onSearch()">Search</button>
+        </div>
+      </div>
+
+      <!-- Department Filter -->
+      <div class="filter-group">
+        <label for="department">Department</label>
+        <select 
+          id="department" 
+          [(ngModel)]="selectedDepartment"
+          (change)="onSearch()"
+          class="form-select">
+          <option value="">All Departments</option>
+          <option *ngFor="let dept of departments" [value]="dept._id">
+            {{ dept.departmentName }} ({{ dept.departmentCode }})
+          </option>
+        </select>
+      </div>
+
+      <!-- Status Filter -->
+      <div class="filter-group">
+        <label for="status">Status</label>
+        <select 
+          id="status" 
+          [(ngModel)]="selectedStatus"
+          (change)="onSearch()"
+          class="form-select">
+          <option value="">All Status</option>
+          <option value="Active">Active</option>
+          <option value="Inactive">Inactive</option>
+          <option value="Completed">Completed</option>
+        </select>
+      </div>
+
+      <!-- Academic Year Filter -->
+      <div class="filter-group">
+        <label for="academicYear">Academic Year</label>
+        <select 
+          id="academicYear" 
+          [(ngModel)]="selectedYear"
+          (change)="onSearch()"
+          class="form-select">
+          <option value="">All Years</option>
+          <option value="2024-2025">2024-2025</option>
+          <option value="2023-2024">2023-2024</option>
+          <option value="2022-2023">2022-2023</option>
+          <option value="2021-2022">2021-2022</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="loading-spinner"></div>
+    <p>Loading classes...</p>
+  </div>
+
+  <!-- Classes Table -->
+  <div *ngIf="!loading" class="table-container">
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Class Code</th>
+            <th>Class Name</th>
+            <th>Section</th>
+            <th>Department</th>
+            <th>Academic Year</th>
+            <th>Capacity</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="filteredClasses.length === 0">
+            <td colspan="8" class="empty-state">
+              <i class="fas fa-chalkboard"></i>
+              <p>No classes found. Try different filters or create new classes.</p>
+            </td>
+          </tr>
+          
+          <tr *ngFor="let cls of filteredClasses">
+            <td>
+              <strong>{{ cls.classCode }}</strong>
+            </td>
+            <td>
+              <div class="class-info">
+                <div class="class-icon">
+                  <i class="fas fa-chalkboard-teacher"></i>
+                </div>
+                <div class="class-details">
+                  <div class="class-name">{{ cls.className }}</div>
+                  <div class="class-meta text-muted">
+                    <i class="fas fa-user-tie"></i> {{ cls.classTeacher?.name || 'No Teacher Assigned' }}
+                  </div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <span class="badge badge-light">{{ cls.section }}</span>
+            </td>
+            <td>
+              <span *ngIf="cls.department" class="badge badge-light">
+                {{ cls.department.departmentName }}
+              </span>
+            </td>
+            <td>{{ cls.academicYear }}</td>
+            <td>
+              <div class="seats-info">
+                <div class="seats-progress">
+                  <div class="progress-bar" 
+                       [style.width.%]="(cls.currentStrength / cls.capacity) * 100"
+                       [class.bg-danger]="cls.currentStrength >= cls.capacity"
+                       [class.bg-warning]="cls.currentStrength >= cls.capacity * 0.8 && cls.currentStrength < cls.capacity"
+                       [class.bg-success]="cls.currentStrength < cls.capacity * 0.8">
+                  </div>
+                </div>
+                <div class="seats-count">
+                  <span [class]="'badge ' + getSeatsBadgeClass(cls)">
+                    {{ cls.currentStrength }}/{{ cls.capacity }}
+                  </span>
+                  <span class="text-muted ml-2">({{ cls.availableSeats }} available)</span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <span [class]="'badge ' + getStatusBadgeClass(cls.status)">
+                {{ cls.status }}
+              </span>
+            </td>
+            <td>
+              <div class="action-buttons">
+                <a [routerLink]="['/classes', cls._id, 'edit']" 
+                   class="btn btn-sm btn-warning"
+                   title="Edit">
+                  <i class="fas fa-edit"></i>
+                </a>
+                <button (click)="onDeleteClass(cls._id!)"
+                        class="btn btn-sm btn-danger"
+                        title="Delete">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div *ngIf="pagination.totalPages > 1" class="pagination">
+      <div class="pagination-info">
+        Showing {{ (pagination.currentPage - 1) * pagination.itemsPerPage + 1 }} to 
+        {{ Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems) }} 
+        of {{ pagination.totalItems }} entries
+      </div>
+      
+      <div class="pagination-controls">
+        <button 
+          class="btn btn-sm"
+          [class.disabled]="!pagination.hasPrevPage"
+          (click)="onPageChange(pagination.currentPage - 1)"
+          [disabled]="!pagination.hasPrevPage">
+          <i class="fas fa-chevron-left"></i> Previous
+        </button>
+        
+        <div class="page-numbers">
+          <button 
+            *ngFor="let page of getPageNumbers()"
+            class="btn btn-sm"
+            [class.active]="page === pagination.currentPage"
+            (click)="onPageChange(page)">
+            {{ page }}
+          </button>
+        </div>
+        
+        <button 
+          class="btn btn-sm"
+          [class.disabled]="!pagination.hasNextPage"
+          (click)="onPageChange(pagination.currentPage + 1)"
+          [disabled]="!pagination.hasNextPage">
+          Next <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
